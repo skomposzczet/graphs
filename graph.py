@@ -59,10 +59,7 @@ class Graph:
         inc_matrix = np.transpose(np.array(inc_matrix))
 
         for edge in inc_matrix:
-            neigbours = []
-            for i, node in enumerate(edge):
-                if node == 1:
-                    neigbours.append(i)
+            neigbours = [i for i, node in enumerate(edge) if node == 1]
 
             if len(neigbours) != 2:
                 raise BadGraphInput(f'invalid edge, {len(neigbours)} nodes')
@@ -170,6 +167,7 @@ class GraphDrawer:
             result[node] = np.array([x,y])
 
         return result
+
 
 class RandomGraph:
     def random_nl(node_count: int, edge_count: int) -> Graph:
