@@ -3,6 +3,8 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 import math
+from itertools import combinations
+from random import sample, random
 
 def _get_lines(filename):
     with open(filename) as fh:
@@ -168,3 +170,31 @@ class GraphDrawer:
             result[node] = np.array([x,y])
 
         return result
+
+class RandomGraph:
+    def random_nl(node_count: int, edge_count: int) -> Graph:
+        if not 0 <= edge_count <= node_count*(node_count-1)/2:
+            raise ValueError(f'l should be in [0, n(n-1)/2], is n={node_count};l={edge_count}')
+        possible_egdes = list(combinations(range(node_count), 2))
+        return RandomGraph.from_edges(sample(possible_egdes, edge_count), node_count)
+
+    def random_np(node_count: int, probability: float) -> Graph:
+        if not 0.0 <= probability <= 1.0:
+            raise ValueError(f'p should between 0 and 1, is {probability}')
+        possible_egdes = list(combinations(range(node_count), 2))
+        return RandomGraph.from_edges([edge for edge in possible_egdes if random()<probability], node_count)
+
+    def from_edges(edges: list, n: int) -> Graph:
+        matrix = [[0]*n for _ in range(n)]
+        for edge in edges:
+            i, j = edge
+            matrix[i][j] = 1
+            matrix[j][i] = 1
+
+        g = Graph()
+        g.from_neighbourhood_matrix(matrix)
+        return g
+
+
+if __name__ == '__main__':
+    pass
