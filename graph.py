@@ -1,4 +1,8 @@
+from __future__ import annotations
 import numpy as np
+import networkx as nx
+import matplotlib.pyplot as plt
+import math
 
 def _get_lines(filename):
     with open(filename) as fh:
@@ -99,3 +103,68 @@ class Graph:
                     current_edge += 1
 
         return matrix
+
+
+class GraphDrawer:
+    def __init__(self):
+        self.graph = None
+        self.r = 1.
+        self.xy = [0.,0.]
+        self.title = ''
+
+    def parse(self, graph: Graph) -> GraphDrawer:
+        adj_list = graph.as_adjacency_list()
+        g=nx.Graph()
+        for node, neighs in adj_list.items():
+            if not neighs:
+                g.add_node(node)
+                continue
+            for neigh in neighs:
+                g.add_edge(node, neigh)
+        self.graph = g
+        return self
+
+    def with_title(self, title: str) -> GraphDrawer:
+        self.title = title
+        return self
+
+    def to_screen(self):
+        self.__draw()
+        plt.show()
+        GraphDrawer.__plt_close()
+
+    def to_file(self, filename: str):
+        self.__draw()
+        plt.savefig(filename)
+        GraphDrawer.__plt_close()
+
+    def __plt_close():
+        plt.clf()
+        plt.cla()
+        plt.close()
+
+    def __draw(self):
+        if self.graph is None:
+            raise TypeError('Graph to draw is None')
+        circ=plt.Circle((self.xy[0], self.xy[1]), self.r, color='r', fill=False, linestyle=':')
+        _, ax = plt.subplots()
+        ax.add_patch(circ)
+        nx.draw(self.graph,
+            pos=self.__make_pos(),
+            labels=None,
+            node_color='#D3D3D3'
+        )
+        plt.axis('scaled')
+        plt.title(self.title)
+
+    def __make_pos(self) -> dict:
+        nodes = sorted(self.graph.nodes())
+        alpha = 2*math.pi/len(nodes)
+        result = {}
+
+        for i,node in enumerate(nodes):
+            x = self.xy[0] + self.r * math.sin(i*alpha)
+            y = self.xy[1] + self.r * math.cos(i*alpha)
+            result[node] = np.array([x,y])
+
+        return result
