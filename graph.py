@@ -91,7 +91,7 @@ class Graph:
     def as_adjacency_list(self):
         return {i + 1: [j + 1 for j, v in enumerate(row) if v == 1] for i, row in enumerate(self.matrix)}
 
-    # task 2 methods in class Graph are below
+    # below in class Graph there are methods created for task 2
 
     def as_incidence_matrix(self):
         """converts graphical sequence to incidence matrix"""

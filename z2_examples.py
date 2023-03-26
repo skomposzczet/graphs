@@ -1,3 +1,4 @@
+from euler import Euler
 from graph import Graph, GraphDrawer, check_graphic_sequence
 
 
@@ -26,11 +27,20 @@ def task3():
     g.components()
 
 
+def task4():
+    e = Euler()
+    e.create_graph(8)
+    gd = GraphDrawer()
+    gd.parse(e.graph).with_title('some euler graph').to_screen()
+    e.set_euler_path()
+
+
 if __name__ == '__main__':
     try:
-        task1()
-        task2()
-        task3()
+        # task1()
+        # task2()
+        # task3()
+        task4()
 
     except Exception as e:
         raise e
