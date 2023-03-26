@@ -1,5 +1,5 @@
 from euler import Euler
-from graph import Graph, GraphDrawer, check_graphic_sequence
+from graph import Graph, GraphDrawer, check_graphic_sequence, random_regular_graph
 
 
 def task1():
@@ -14,7 +14,7 @@ def task2():
     g.from_graphic_sequence_file('./data/graphic_sequence.txt')
     gd = GraphDrawer()
     gd.parse(g).with_title('before randomization').to_screen()
-    g.randomize(100)
+    g.randomize(10)
     gd.parse(g).with_title('after randomization').to_screen()
 
 
@@ -24,7 +24,7 @@ def task3():
     g.from_graphic_sequence_file('./data/graphic_sequence2.txt')
     gd = GraphDrawer()
     gd.parse(g).with_title('some graph where we search for components').to_screen()
-    g.components()
+    print(g.components())
 
 
 def task4():
@@ -35,12 +35,19 @@ def task4():
     e.set_euler_path()
 
 
+def task5():
+    g = random_regular_graph(10, 11)
+    gd = GraphDrawer()
+    gd.parse(g).with_title('random k-regular graph').to_screen()
+
+
 if __name__ == '__main__':
     try:
         # task1()
         # task2()
         # task3()
-        task4()
+        # task4()
+        task5()
 
     except Exception as e:
         raise e
