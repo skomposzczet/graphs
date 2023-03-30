@@ -91,7 +91,7 @@ class Graph:
     def as_adjacency_list(self):
         return {i + 1: [j + 1 for j, v in enumerate(row) if v == 1] for i, row in enumerate(self.matrix)}
 
-    # task 2 methods in class Graph are below
+    # below in class Graph there are methods created for task 2
 
     def as_incidence_matrix(self):
         """converts graphical sequence to incidence matrix"""
@@ -141,6 +141,11 @@ class Graph:
 
     def randomize(self, iterations):
         """randomizes edges in graph"""
+
+        if sum(x.count(0) for x in self.matrix) == len(self.matrix):
+            # no need to randomize complete graph
+            return
+
         count = 0
         while count < iterations:
             a, b, c, d = random.sample(range(0, len(self.matrix)), 4)
@@ -151,8 +156,8 @@ class Graph:
                 self.matrix[d][a] = self.matrix[b][c] = 1
                 count += 1
 
-    def components(self):
-        """finds all components in graph"""
+    def components(self, toPrint=False):
+        """finds all components in graph, returns number of components"""
         nr = 0
         comp = [-1 for _ in range(len(self.matrix))]
 
@@ -168,12 +173,14 @@ class Graph:
             if counter:
                 occurences.append(counter)
 
-        for index in range(len(occurences)):
-            print('\n', index+1, ':', end=' ')
-            for edge_number in range(len(comp)):
-                if comp[edge_number] == index+1:
-                    print(edge_number+1, end=' ')
-        print('\nThe longest component: ', max(set(comp), key=comp.count))
+        if toPrint:
+            for index in range(len(occurences)):
+                print('\n', index+1, ':', end=' ')
+                for edge_number in range(len(comp)):
+                    if comp[edge_number] == index+1:
+                        print(edge_number+1, end=' ')
+            print('\nThe longest component: ', max(set(comp), key=comp.count))
+        return len(occurences)
 
     def components_R(self, nr, v, matrix, comp):
         """implements depth-first search (DFS)"""
@@ -181,7 +188,6 @@ class Graph:
             if v != edge and matrix[v][edge] and comp[edge] == -1:
                 comp[edge] = nr
                 self.components_R(nr, edge, matrix, comp)
-
 
 class GraphDrawer:
     def __init__(self):
@@ -274,7 +280,7 @@ class RandomGraph:
 
 
 def check_graphic_sequence(graphic_sequence) -> bool:
-    """task2, checks whether given sequence is graphical"""
+    """task2, checks whether given sequence is graphic"""
     graphic_sequence_copy = graphic_sequence.copy()
     graphic_sequence_copy.sort(reverse=True)
 
@@ -290,6 +296,21 @@ def check_graphic_sequence(graphic_sequence) -> bool:
 
         graphic_sequence_copy[0] = 0
         graphic_sequence_copy.sort(reverse=True)
+
+
+def random_regular_graph(degree, number_of_edges):
+    if degree > number_of_edges:
+        raise BadGraphInput('too little number of edges!')
+
+    if degree % 2 == 1 and number_of_edges % 2 == 0:
+        raise BadGraphInput('when degree is uneven, number of edges must be even!')
+    graphic_sequence = [degree for _ in range(number_of_edges)]
+    g = Graph()
+    g.from_graphic_sequence(graphic_sequence)
+    g.randomize(40)
+    while g.components() != 1:
+        g.randomize(5)
+    return g
 
 
 if __name__ == '__main__':
