@@ -156,7 +156,7 @@ class Graph:
                 self.matrix[d][a] = self.matrix[b][c] = 1
                 count += 1
 
-    def components(self):
+    def components(self, toPrint=False):
         """finds all components in graph, returns number of components"""
         nr = 0
         comp = [-1 for _ in range(len(self.matrix))]
@@ -173,12 +173,13 @@ class Graph:
             if counter:
                 occurences.append(counter)
 
-        for index in range(len(occurences)):
-            print('\n', index+1, ':', end=' ')
-            for edge_number in range(len(comp)):
-                if comp[edge_number] == index+1:
-                    print(edge_number+1, end=' ')
-        print('\nThe longest component: ', max(set(comp), key=comp.count))
+        if toPrint:
+            for index in range(len(occurences)):
+                print('\n', index+1, ':', end=' ')
+                for edge_number in range(len(comp)):
+                    if comp[edge_number] == index+1:
+                        print(edge_number+1, end=' ')
+            print('\nThe longest component: ', max(set(comp), key=comp.count))
         return len(occurences)
 
     def components_R(self, nr, v, matrix, comp):
@@ -279,7 +280,7 @@ class RandomGraph:
 
 
 def check_graphic_sequence(graphic_sequence) -> bool:
-    """task2, checks whether given sequence is graphical"""
+    """task2, checks whether given sequence is graphic"""
     graphic_sequence_copy = graphic_sequence.copy()
     graphic_sequence_copy.sort(reverse=True)
 
