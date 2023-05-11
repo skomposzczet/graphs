@@ -49,20 +49,30 @@ class Hamilton:
             raise BadGraphInput('it is not graphic sequence')
 
     def check_hamilton_path(self):
+        if len(self.stack) == 0:
+            return
+
         if len(self.stack) == len(self.visited):
             if self.g.matrix[self.stack[0]][self.stack[-1]] == 1:
                 self.stack.append(self.stack[0])
+                print([i + 1 for i in self.stack], '1st')
+                return self.stack
             else:
                 self.visited[self.stack[-1]] = -1
                 self.stack.pop()
+                print([i + 1 for i in self.stack], '2nd')
                 self.check_hamilton_path()
         else:
-            for edge_index in range(1, len(self.g.matrix)):
+            for edge_index in range(len(self.g.matrix)):
                 if self.g.matrix[self.stack[-1]][edge_index] == 1 and self.visited[edge_index] == -1:
                     self.stack.append(edge_index)
                     self.visited[edge_index] = 1
-                    self.check_hamilton_path()
+                    print([i + 1 for i in self.stack], '3rd')
+                    result = self.check_hamilton_path()
+                    if result:
+                        return result
 
             if len(self.stack) < len(self.g.matrix):
                 self.visited[self.stack[-1]] = -1
+                print([i + 1 for i in self.stack], '4th')
                 self.stack.pop()

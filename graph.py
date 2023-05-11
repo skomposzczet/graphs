@@ -123,11 +123,15 @@ class Graph:
         graphic_sequence = [int(val) for val in str(input) if val.isdigit()]
         if check_graphic_sequence(graphic_sequence):
             self.from_graphic_sequence(graphic_sequence)
-        return graphic_sequence
+            return graphic_sequence
 
     def from_graphic_sequence(self, graphic_sequence):
-        """converts graphic sequence to incidence matrix"""
+        """converts graphic sequence to neighbourhood matrix"""
         graphic_sequence.sort(reverse=True)
+
+        if graphic_sequence[0] >= len(graphic_sequence):
+            raise BadGraphInput('too many edges!')
+
         matrix = [[0 for _ in range(len(graphic_sequence))] for _ in range(len(graphic_sequence))]
         indexes_with_degrees = [[i, graphic_sequence[i]] for i in range(len(graphic_sequence))]
         for i in range(len(graphic_sequence)):
@@ -143,11 +147,12 @@ class Graph:
         """randomizes edges in graph"""
 
         if sum(x.count(0) for x in self.matrix) == len(self.matrix):
-            # no need to randomize complete graph
+            #  nothing changes if complete graph is randomized
             return
 
         count = 0
-        while count < iterations:
+        number_of_iterations = 0
+        while count < iterations and number_of_iterations < 10*iterations:
             a, b, c, d = random.sample(range(0, len(self.matrix)), 4)
             if self.matrix[a][b] == self.matrix[c][d] == 1 and self.matrix[a][d] == self.matrix[c][b] == 0:
                 self.matrix[a][b] = self.matrix[c][d] = 0
@@ -155,6 +160,7 @@ class Graph:
                 self.matrix[a][d] = self.matrix[c][b] = 1
                 self.matrix[d][a] = self.matrix[b][c] = 1
                 count += 1
+            number_of_iterations += 1
 
     def components(self, toPrint=False):
         """finds all components in graph, returns number of components"""
@@ -281,6 +287,9 @@ class RandomGraph:
 
 def check_graphic_sequence(graphic_sequence) -> bool:
     """task2, checks whether given sequence is graphic"""
+    if not graphic_sequence:
+        return False
+
     graphic_sequence_copy = graphic_sequence.copy()
     graphic_sequence_copy.sort(reverse=True)
 
@@ -302,14 +311,17 @@ def random_regular_graph(degree, number_of_edges):
     if degree > number_of_edges:
         raise BadGraphInput('too little number of edges!')
 
-    if degree % 2 == 1 and number_of_edges % 2 == 0:
+    if degree % 2 == 1 and number_of_edges % 2 == 1:
         raise BadGraphInput('when degree is uneven, number of edges must be even!')
     graphic_sequence = [degree for _ in range(number_of_edges)]
     g = Graph()
     g.from_graphic_sequence(graphic_sequence)
-    g.randomize(40)
-    while g.components() != 1:
-        g.randomize(5)
+
+    if degree != 0:
+        g.randomize(40)
+        while g.components() != 1:
+            g.randomize(5)
+            print(g.components())
     return g
 
 
