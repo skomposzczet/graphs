@@ -319,9 +319,6 @@ def random_regular_graph(degree, number_of_edges):
 
     if degree != 0:
         g.randomize(40)
-        while g.components() != 1:
-            g.randomize(5)
-            print(g.components())
     return g
 
 
