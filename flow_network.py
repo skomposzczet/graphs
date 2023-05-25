@@ -1,10 +1,7 @@
 import networkx as nx
 from matplotlib import pyplot as plt
 import random
-import numpy as np
-
 from networkx import NetworkXNoCycle
-
 from graph import BadGraphInput
 
 
@@ -15,7 +12,7 @@ class FlowNetwork:
 
     def create_graph(self, N: int):
         if N < 2 or N > 4:
-            raise BadGraphInput('not enough layers')
+            raise BadGraphInput('2,3 or 4 layers expected')
 
         self.G.add_node('s', layer=0)
         size_of_layers = [1]
@@ -35,48 +32,27 @@ class FlowNetwork:
         for index in range(size_of_layers[1]):
             self.G.add_edge('s', chr(ord('a') + index), weight=random.randint(1, 10))
 
-        # add edges in the middle of network
+        # add edges to the middle of layer
         for index in range(1, N):
-            if size_of_layers[index] == size_of_layers[index+1]:
-                current_edge_index = 0
-                for edge_number in range(size_of_layers[index]):
-                    start_node = chr(ord('a')+current_edge_index+sum(size_of_layers[1:index]))
-                    end_node = chr(ord('a')+sum(size_of_layers[1:index+1])+current_edge_index)
-                    self.G.add_edge(start_node, end_node, weight=random.randint(1, 10))
-                    current_edge_index += 1
-                    # print(start_node, end_node, index)
+            current_edge_index = 0
+            for edge_number in range(min(size_of_layers[index], size_of_layers[index+1])):
+                start_node = chr(ord('a')+current_edge_index+sum(size_of_layers[1:index]))
+                end_node = chr(ord('a')+sum(size_of_layers[1:index+1])+current_edge_index)
+                self.G.add_edge(start_node, end_node, weight=random.randint(1, 10))
+                current_edge_index += 1
 
-            elif size_of_layers[index] > size_of_layers[index+1]:
-                current_edge_index = 0
-                for edge_number in range(size_of_layers[index+1]):
-                    start_node = chr(ord('a')+current_edge_index+sum(size_of_layers[1:index]))
-                    end_node = chr(ord('a')+sum(size_of_layers[1:index+1])+current_edge_index)
-                    self.G.add_edge(start_node, end_node, weight=random.randint(1, 10))
-                    current_edge_index += 1
-                    # print(start_node, end_node, index)
-
+            if size_of_layers[index] > size_of_layers[index+1]:
                 for rest in range(size_of_layers[index]-current_edge_index):
                     start_node = chr(ord('a')+sum(size_of_layers[1:index])+current_edge_index)
                     end_node = chr(ord('a')+sum(size_of_layers[1:index+1])+random.randint(0, size_of_layers[index+1]-1))
                     self.G.add_edge(start_node, end_node, weight=random.randint(1, 10))
                     current_edge_index += 1
-                    # print(start_node, end_node, index, rest)
-
             else:
-                current_edge_index = 0
-                for edge_number in range(size_of_layers[index]):
-                    start_node = chr(ord('a') + current_edge_index + sum(size_of_layers[1:index]))
-                    end_node = chr(ord('a') + sum(size_of_layers[1:index + 1]) + current_edge_index)
-                    self.G.add_edge(start_node, end_node, weight=random.randint(1, 10))
-                    current_edge_index += 1
-                    # print(start_node, end_node, index)
-
                 for rest in range(size_of_layers[index+1]-current_edge_index):
                     start_node = chr(ord('a')+sum(size_of_layers[1:index]))
                     end_node = chr(ord('a')+sum(size_of_layers[1:index+1])+current_edge_index)
                     self.G.add_edge(start_node, end_node, weight=random.randint(1, 10))
                     current_edge_index += 1
-                    # print(start_node, end_node, index, rest)
 
         # add edges to last layer
         for index in range(size_of_layers[-2]):
@@ -92,10 +68,8 @@ class FlowNetwork:
             if random_input_layer > 0 and 0 < random_output_layer < N+1:
                 input_node = chr(ord('a')+sum(size_of_layers[1:random_input_layer])+index_input_layer)
                 output_node = chr(ord('a') + sum(size_of_layers[1:random_output_layer])+index_output_layer)
-                if not self.G.has_edge(input_node, output_node) and not self.G.has_edge(output_node, input_node) and input_node != output_node  :
-                    # print(input_node, output_node, random_input_layer, random_output_layer,'indexes:', index_input_layer, index_output_layer)
+                if not self.G.has_edge(input_node, output_node) and not self.G.has_edge(output_node, input_node) and input_node != output_node:
                     self.G.add_edge(input_node, output_node, weight=random.randint(1, 10))
-
                     try:
                         found_cycle = nx.find_cycle(self.G)
                         if found_cycle:
@@ -112,14 +86,9 @@ class FlowNetwork:
         pos = nx.multipartite_layout(self.G, subset_key='layer')
         nx.draw(self.G, pos, with_labels=True)
         edge_labels = nx.get_edge_attributes(self.G, 'weight')
-        nx.draw_networkx_edge_labels(self.G, pos, edge_labels=edge_labels)
+        nx.draw_networkx_edge_labels(self.G, pos, edge_labels=edge_labels, label_pos=0.75, alpha=0.8, font_size=8)
         plt.show()
 
 
 if __name__ == '__main__':
-    for _ in range(1):
-        a = FlowNetwork()
-        num = random.randint(2, 4)
-        a.create_graph(num)
-        print(a.adjacency_matrix())
-        a.draw_graph()
+    pass
