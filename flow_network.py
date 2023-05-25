@@ -1,6 +1,10 @@
 import networkx as nx
 from matplotlib import pyplot as plt
 import random
+import numpy as np
+
+from networkx import NetworkXNoCycle
+
 from graph import BadGraphInput
 
 
@@ -10,13 +14,13 @@ class FlowNetwork:
         self.G = nx.DiGraph()
 
     def create_graph(self, N: int):
-        if N < 2:
+        if N < 2 or N > 4:
             raise BadGraphInput('not enough layers')
 
         self.G.add_node('s', layer=0)
-        self.G.add_node('t', layer=N+1)
         size_of_layers = [1]
 
+        # add nodes to network
         index_alphabet = 0
         for layer in range(1, N+1):
             number_of_nodes = random.randint(2, N)
@@ -24,6 +28,7 @@ class FlowNetwork:
             for _ in range(number_of_nodes):
                 self.G.add_node(chr(ord('a') + index_alphabet), layer=layer)
                 index_alphabet += 1
+        self.G.add_node('t', layer=N + 1)
         size_of_layers.append(1)
 
         # add edges from source to first layer
@@ -73,10 +78,35 @@ class FlowNetwork:
                     current_edge_index += 1
                     # print(start_node, end_node, index, rest)
 
-
         # add edges to last layer
         for index in range(size_of_layers[-2]):
             self.G.add_edge(chr(ord('a') + sum(size_of_layers[1:-2])+index), 't', weight=random.randint(1, 10))
+
+        added_edges = 0
+        while added_edges < 2*N:
+            random_input_layer = random.randint(1, N)
+            random_output_layer = random.randint(random_input_layer-1, random_input_layer+1)
+            index_input_layer = random.randint(0, size_of_layers[random_input_layer]-1)
+            index_output_layer = random.randint(0, size_of_layers[random_output_layer]-1)
+
+            if random_input_layer > 0 and 0 < random_output_layer < N+1:
+                input_node = chr(ord('a')+sum(size_of_layers[1:random_input_layer])+index_input_layer)
+                output_node = chr(ord('a') + sum(size_of_layers[1:random_output_layer])+index_output_layer)
+                if not self.G.has_edge(input_node, output_node) and not self.G.has_edge(output_node, input_node) and input_node != output_node  :
+                    # print(input_node, output_node, random_input_layer, random_output_layer,'indexes:', index_input_layer, index_output_layer)
+                    self.G.add_edge(input_node, output_node, weight=random.randint(1, 10))
+
+                    try:
+                        found_cycle = nx.find_cycle(self.G)
+                        if found_cycle:
+                            self.G.remove_edge(input_node, output_node)
+                    except NetworkXNoCycle:
+                        added_edges += 1
+
+    def adjacency_matrix(self):
+        print('-----------\nadjacency matrix:')
+        print(self.G.nodes)
+        return nx.adjacency_matrix(self.G).toarray()
 
     def draw_graph(self):
         pos = nx.multipartite_layout(self.G, subset_key='layer')
@@ -87,6 +117,9 @@ class FlowNetwork:
 
 
 if __name__ == '__main__':
-    a = FlowNetwork()
-    a.create_graph(4)
-    a.draw_graph()
+    for _ in range(1):
+        a = FlowNetwork()
+        num = random.randint(2, 4)
+        a.create_graph(num)
+        print(a.adjacency_matrix())
+        a.draw_graph()
