@@ -3,14 +3,16 @@ mod alg;
 
 use std::fs::File;
 use std::io::{BufRead, BufReader};
-use graph::Point;
+use graph::{Point, Graph};
+use alg::simulated_annealing;
 
 fn main() {
-    let points: Vec<Point> = {
+    let graph: Graph = {
         let file = File::open("input.dat").unwrap();
-        BufReader::new(file)
+        let data = BufReader::new(file)
             .lines()
             .map(|line| Point::from_str(&line.unwrap()))
-            .collect()
+            .collect();
+        Graph::new(data)
     };
 }
