@@ -15,4 +15,5 @@ fn main() {
             .collect();
         Graph::new(data)
     };
+    simulated_annealing(&graph, 200, 400);
 }
