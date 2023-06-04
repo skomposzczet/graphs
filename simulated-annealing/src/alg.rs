@@ -1,11 +1,14 @@
+use std::{fs::{File, create_dir_all}, io::{Write, Result}};
+
 use crate::graph::Graph;
 use rand::{thread_rng, seq::SliceRandom, Rng};
 
+const OUTPUT_DIR: &'static str = "output";
+
 pub fn simulated_annealing(graph: &Graph, cooldown_iter: u32, max_iter: u32) {
-    println!("{}, {}", cooldown_iter, max_iter);
     let mut cycle: Vec<usize> =  (0..graph.len()).collect();
     cycle.shuffle(&mut thread_rng());
-    println!("{}", calc_distance(graph, &cycle));
+    to_file(&graph, &cycle, "before", calc_distance(graph, &cycle)).unwrap();
     for i in (1..cooldown_iter+1).rev() {
         let temperature: f32 = 0.001 * (i as f32).powi(2);
 
@@ -25,7 +28,7 @@ pub fn simulated_annealing(graph: &Graph, cooldown_iter: u32, max_iter: u32) {
             }
         }
     }
-    println!("{}", calc_distance(graph, &cycle));
+    to_file(&graph, &cycle, "after", calc_distance(graph, &cycle)).unwrap();
 }
 
 fn calc_distance(graph: &Graph, cycle: &[usize])-> f32 {
@@ -54,4 +57,16 @@ fn swap_edges(cycle: &mut [usize], (a, c): &(usize, usize)) {
     for delta in 0..(c-a)/2 {
         cycle.swap(a+1+delta, c-delta);
     }
+}
+
+fn to_file(graph: &Graph, cycle: &[usize], filename: &str, distance: f32) -> Result<()> {
+    create_dir_all(OUTPUT_DIR)?;
+    let filename = format!("{}/{}.txt", OUTPUT_DIR, filename);
+    let mut file = File::create(filename)?;
+
+    file.write_all(format!("{}\n", distance).as_bytes())?;
+    for curr_point in cycle.iter() {
+        file.write_all(format!("{} {}\n", graph[*curr_point].x, graph[*curr_point].y).as_bytes())?;
+    }
+    Ok(())
 }
