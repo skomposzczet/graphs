@@ -8,27 +8,31 @@ const OUTPUT_DIR: &'static str = "output";
 pub fn simulated_annealing(graph: &Graph, cooldown_iter: u32, max_iter: u32) {
     let mut cycle: Vec<usize> =  (0..graph.len()).collect();
     cycle.shuffle(&mut thread_rng());
-    to_file(&graph, &cycle, "before", calc_distance(graph, &cycle)).unwrap();
+
+    let mut cur_dist = calc_distance(graph, &cycle);
+    to_file(&graph, &cycle, "before", cur_dist).unwrap();
     for i in (1..cooldown_iter+1).rev() {
         let temperature: f32 = 0.001 * (i as f32).powi(2);
 
         for _ in 0..max_iter {
             let mut cycle_new = cycle.clone();
-            swap_edges(&mut cycle_new, &random_edges(cycle.len()));
+            let edges = random_edges(cycle.len());
+            swap_edges(&mut cycle_new, &edges);
 
-            let cur_dist = calc_distance(graph, &cycle);
             let new_dist = calc_distance(graph, &cycle_new);
             if new_dist < cur_dist {
                 cycle = cycle_new;
+                cur_dist = new_dist;
             } else {
                 let r = thread_rng().gen::<f32>();
                 if r < f32::exp(-( (new_dist - cur_dist) / temperature)) {
                     cycle = cycle_new;
+                    cur_dist = new_dist;
                 }
             }
         }
     }
-    to_file(&graph, &cycle, "after", calc_distance(graph, &cycle)).unwrap();
+    to_file(&graph, &cycle, "after", cur_dist).unwrap();
 }
 
 fn calc_distance(graph: &Graph, cycle: &[usize])-> f32 {
