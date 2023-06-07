@@ -5,12 +5,12 @@ use rand::{thread_rng, seq::SliceRandom, Rng};
 
 const OUTPUT_DIR: &'static str = "output";
 
-pub fn simulated_annealing(graph: &Graph, cooldown_iter: u32, max_iter: u32) {
+pub fn simulated_annealing(graph: &Graph, cooldown_iter: u32, max_iter: u32, prefix: &str) {
     let mut cycle: Vec<usize> =  (0..graph.len()).collect();
     cycle.shuffle(&mut thread_rng());
 
     let mut cur_dist = calc_distance(graph, &cycle);
-    to_file(&graph, &cycle, "before", cur_dist).unwrap();
+    to_file(&graph, &cycle, &format!("{}_before", prefix), cur_dist).unwrap();
     for i in (1..cooldown_iter+1).rev() {
         let temperature: f32 = 0.001 * (i as f32).powi(2);
 
@@ -32,7 +32,7 @@ pub fn simulated_annealing(graph: &Graph, cooldown_iter: u32, max_iter: u32) {
             }
         }
     }
-    to_file(&graph, &cycle, "after", cur_dist).unwrap();
+    to_file(&graph, &cycle, &format!("{}_after", prefix), cur_dist).unwrap();
 }
 
 fn calc_distance(graph: &Graph, cycle: &[usize])-> f32 {
