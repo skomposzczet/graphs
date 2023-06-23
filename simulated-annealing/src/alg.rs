@@ -6,7 +6,7 @@ use rand::{thread_rng, seq::SliceRandom, Rng};
 const OUTPUT_DIR: &'static str = "output";
 
 pub fn simulated_annealing(graph: &Graph, cooldown_iter: u32, max_iter: u32, prefix: &str) {
-    let mut cycle: Vec<usize> =  (0..graph.len()).collect();
+    let mut cycle: Vec<usize> = (0..graph.len()).collect();
     cycle.shuffle(&mut thread_rng());
 
     let mut cur_dist = calc_distance(graph, &cycle);
